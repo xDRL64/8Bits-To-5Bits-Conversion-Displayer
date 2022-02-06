@@ -1,0 +1,491 @@
+
+
+
+<script type="text/javascript" src="./dataVerticalDisplayer.js"></script>
+
+<script type="text/javascript" src="./colorPreviewDisplayer.js"></script>
+
+<script type="text/javascript" src="./descriptionTexts.js"></script>
+
+<script>
+
+	var reference_8bitsIndex = [];
+	var ref_8bitsIndex = reference_8bitsIndex;
+
+	
+	var make_ref_8bitsIndex = function(){
+	
+		for(let i=0; i<256; i++)
+			ref_8bitsIndex[ref_8bitsIndex.length] = i;
+		
+	};
+
+
+	var table_8bits_rightBitShift3 = [];
+	var tbl_8bits_rbs3 = table_8bits_rightBitShift3;
+	
+	var stat_tbl_8bits_rbs3 = [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0];
+	
+	var make_tbl_8bits_rbs3 = function(){
+	
+		for(let i=0; i<256; i++){
+			result = i >> 3;
+			stat_tbl_8bits_rbs3[result]++;
+			tbl_8bits_rbs3[tbl_8bits_rbs3.length] = result;
+		}
+	};
+	
+	
+	var table_8bits_reduceThenRightBitShift3 = [];
+	var tbl_8bits_rtrbs3 = table_8bits_reduceThenRightBitShift3;
+	
+	var stat_tbl_8bits_rtrbs3 = [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0];
+	
+	var make_tbl_8bits_rtrbs3 = function(reduce){
+	
+		for(let i=0; i<256; i++){
+			result = ((i>>reduce)<<reduce) >> 3;
+			stat_tbl_8bits_rtrbs3[result]++;
+			tbl_8bits_rtrbs3[tbl_8bits_rtrbs3.length] = result;
+		}
+	};
+	
+	
+	var multiplier = 31 / 255;
+	
+
+	var table_8bits_floorMultiplier = [];
+	var tbl_8bits_fm = table_8bits_floorMultiplier;
+	
+	var stat_tbl_8bits_fm = [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0];
+	
+	var make_tbl_8bits_fm = function(){
+	
+		for(let i=0; i<256; i++){
+			result = Math.floor(multiplier*i);
+			stat_tbl_8bits_fm[result]++;
+			tbl_8bits_fm[tbl_8bits_fm.length] = result;
+		}
+	};
+	
+
+	var table_8bits_floorMultiplierPlus05 = [];
+	var tbl_8bits_fmp05 = table_8bits_floorMultiplierPlus05;
+
+	var stat_tbl_8bits_fmp05 = [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0];
+	
+	var make_tbl_8bits_fmp05 = function(_05){
+	
+		for(let i=0; i<256; i++){
+			result = Math.floor((multiplier*i)+_05);
+			
+			result = result>31 ? 31 : result;
+			
+			stat_tbl_8bits_fmp05[result]++;
+			tbl_8bits_fmp05[tbl_8bits_fmp05.length] = result;
+		}
+	};
+	
+
+	table_5bits_to_8bits = [
+		0, 8, 16, 24, 33, 41, 49, 57,
+		66, 74, 82, 90, 99, 107, 115, 123,
+		132, 140, 148, 156, 165, 173, 181, 189,
+		198, 206, 214, 222, 231, 239, 247, 255
+	];
+	tbl_5bits_to_8bits = table_5bits_to_8bits;
+	
+	table_8bits_to_5bits = [];
+	tbl_8bits_to_5bits = table_8bits_to_5bits;
+	
+	var stat_tbl_8bits_to_5bits = [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0];
+	
+	var make_tbl_8bits_to_5bits = function(){
+	
+		let stepFrom = 0;
+		let stepTo = 1;
+	
+		for(let i=0; i<256; i++){
+		
+			if(i === tbl_5bits_to_8bits[stepTo]){
+				stepFrom = stepTo;
+				stepTo++;
+			}
+			
+			//tbl_8bits_to_5bits[tbl_8bits_to_5bits.length] = tbl_5bits_to_8bits[stepFrom];
+			tbl_8bits_to_5bits[tbl_8bits_to_5bits.length] = stepFrom;
+			
+			stat_tbl_8bits_to_5bits[stepFrom]++;
+		}
+	
+	};
+	
+	
+	smoothTable_8bits_to_5bits = [];
+	stbl_8bits_to_5bits = smoothTable_8bits_to_5bits;
+	
+	var stat_stbl_8bits_to_5bits = [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0];
+	
+	var make_stbl_8bits_to_5bits = function(smooth=0){
+	
+		let stepFrom = 0;
+		let stepTo = 1;
+		
+		let stepBetween = (tbl_5bits_to_8bits[stepTo] - tbl_5bits_to_8bits[stepFrom]) >> 1;
+		stepBetween += tbl_5bits_to_8bits[stepFrom] + smooth;
+	
+		let smoothSide;
+	
+		for(let i=0; i<256; i++){
+		
+			if(i === tbl_5bits_to_8bits[stepTo] && stepTo<31){
+				stepFrom = stepTo;
+				stepTo++;
+				
+				stepBetween = (tbl_5bits_to_8bits[stepTo] - tbl_5bits_to_8bits[stepFrom]) >> 1;
+				stepBetween += tbl_5bits_to_8bits[stepFrom] + smooth;
+			}
+			
+			if(i <= stepBetween)
+				smoothSide = stepFrom;
+			else
+				smoothSide = stepTo;
+			
+			stbl_8bits_to_5bits[stbl_8bits_to_5bits.length] = smoothSide;
+			
+			stat_stbl_8bits_to_5bits[smoothSide]++;
+			
+		}
+	
+	};
+	
+</script>
+
+<html style="background-color:#ffffff;">
+<body onload="main();" style="background-color:#aaaaaa;">
+</body>
+</html>
+
+<script>
+
+	currentDataTable = [];
+	//dataTables = [];
+
+	var main = function(){
+	
+		oneColPrevFunctions = create_gradientPreviews();
+		
+		oneColPrevFunctions.update_oneColorPreview("from8to5");
+	
+		document.body.appendChild(verticaleDisplayerArea);
+
+		
+		
+		// display : reference index 0 to 31 then 32 to 255
+	
+		make_ref_8bitsIndex();
+		vDisplayer_ref_8bitsIndex = create_verticalDisplayer("#ffffff", false);
+		fill_verticalDisplayer(vDisplayer_ref_8bitsIndex, ref_8bitsIndex);
+		vDisplayer_ref_8bitsIndex.appdata.description = texts['ref_8bitsIndex'];
+	
+	
+
+		// display calc result : form value(0-->255) >> 3
+	
+		make_tbl_8bits_rbs3();
+		vDisplayer_tbl_8bits_rbs3 = create_verticalDisplayer("#ffdddd", true);
+		fill_verticalDisplayer(vDisplayer_tbl_8bits_rbs3, tbl_8bits_rbs3);
+		vDisplayer_tbl_8bits_rbs3.appdata.description = texts['tbl_8bits_rbs3'];
+	
+		vDisplayer_stat_tbl_8bits_rbs3 = create_verticalDisplayer("#eeffee");
+		fill_verticalDisplayer(vDisplayer_stat_tbl_8bits_rbs3, stat_tbl_8bits_rbs3);
+		vDisplayer_stat_tbl_8bits_rbs3.appdata.description = texts['stat_tbl_8bits_rbs3'];
+		
+		
+		
+		// display calc result : form value(0-->255) reduce then >> 3
+		
+		reduce = 4;
+		make_tbl_8bits_rtrbs3(reduce);
+		vDisplayer_tbl_8bits_rtrbs3 = create_verticalDisplayer("#ffdddd", true);
+		fill_verticalDisplayer(vDisplayer_tbl_8bits_rtrbs3, tbl_8bits_rtrbs3);
+		vDisplayer_tbl_8bits_rtrbs3.appdata.description = texts['tbl_8bits_rtrbs3'];
+		
+		vDisplayer_stat_tbl_8bits_rtrbs3 = create_verticalDisplayer("#eeffee");
+		fill_verticalDisplayer(vDisplayer_stat_tbl_8bits_rtrbs3, stat_tbl_8bits_rtrbs3);
+		vDisplayer_stat_tbl_8bits_rtrbs3.appdata.description = texts['stat_tbl_8bits_rtrbs3'];
+		
+		
+		
+		// display calc result : mathFloor( (31/255)*value(0-->255) )
+		
+		make_tbl_8bits_fm();
+		vDisplayer_tbl_8bits_fm = create_verticalDisplayer("#ffeedd", true);
+		fill_verticalDisplayer(vDisplayer_tbl_8bits_fm, tbl_8bits_fm);
+		vDisplayer_tbl_8bits_fm.appdata.description = texts['tbl_8bits_fm'];
+		
+		vDisplayer_stat_tbl_8bits_fm = create_verticalDisplayer("#eeffee");
+		fill_verticalDisplayer(vDisplayer_stat_tbl_8bits_fm, stat_tbl_8bits_fm);
+		vDisplayer_stat_tbl_8bits_fm.appdata.description = texts['stat_tbl_8bits_fm'];
+		
+		
+		
+		// display calc result : mathFloor( (31/255)*value(0-->255) + 0.5 )
+		
+		_05 = 0.5;
+		make_tbl_8bits_fmp05(_05);
+		vDisplayer_tbl_8bits_fmp05 = create_verticalDisplayer("#ffeedd", true);
+		fill_verticalDisplayer(vDisplayer_tbl_8bits_fmp05, tbl_8bits_fmp05);
+		vDisplayer_tbl_8bits_fmp05.appdata.description = texts['tbl_8bits_fmp05'];
+		
+		vDisplayer_stat_tbl_8bits_fmp05 = create_verticalDisplayer("#eeffee");
+		fill_verticalDisplayer(vDisplayer_stat_tbl_8bits_fmp05, stat_tbl_8bits_fmp05);
+		vDisplayer_stat_tbl_8bits_fmp05.appdata.description = texts['stat_tbl_8bits_fmp05'];
+		
+		
+		
+		// display table : reference 5bits to 8bits table
+		
+		vDisplayer_tbl_5bits_to_8bits = create_verticalDisplayer("#eeddff", false);
+		fill_verticalDisplayer(vDisplayer_tbl_5bits_to_8bits, tbl_5bits_to_8bits);
+		vDisplayer_tbl_5bits_to_8bits.appdata.description = texts['tbl_5bits_to_8bits'];
+		
+		
+		
+		// display table : made from 5bits table to 8bits table
+		
+		make_tbl_8bits_to_5bits();
+		vDisplayer_tbl_8bits_to_5bits = create_verticalDisplayer("#ddeeff", true);
+		fill_verticalDisplayer(vDisplayer_tbl_8bits_to_5bits, tbl_8bits_to_5bits);
+		vDisplayer_tbl_8bits_to_5bits.appdata.description = texts['tbl_8bits_to_5bits'];
+		
+		vDisplayer_stat_tbl_8bits_to_5bits = create_verticalDisplayer("#eeffee");
+		fill_verticalDisplayer(vDisplayer_stat_tbl_8bits_to_5bits, stat_tbl_8bits_to_5bits);
+		vDisplayer_stat_tbl_8bits_to_5bits.appdata.description = texts['stat_tbl_8bits_to_5bits'];
+		
+		
+
+		// display "smooth" table : made from 5bits table to 8bits table
+		
+		smooth = 0
+		make_stbl_8bits_to_5bits(smooth);
+		vDisplayer_stbl_8bits_to_5bits = create_verticalDisplayer("#ddeeff", true);
+		fill_verticalDisplayer(vDisplayer_stbl_8bits_to_5bits, stbl_8bits_to_5bits);
+		vDisplayer_stbl_8bits_to_5bits.appdata.description = texts['stbl_8bits_to_5bits'];
+		
+		vDisplayer_stat_stbl_8bits_to_5bits = create_verticalDisplayer("#eeffee");
+		fill_verticalDisplayer(vDisplayer_stat_stbl_8bits_to_5bits, stat_stbl_8bits_to_5bits);
+		vDisplayer_stat_stbl_8bits_to_5bits.appdata.description = texts['stat_stbl_8bits_to_5bits'];
+		
+		
+		
+		
+		
+		// tbl_8bits_rtrbs3 : bit reduce control (mouse wheel + ctrl + shift) 
+		
+		vDisplayer_tbl_8bits_rtrbs3.onmousewheel = function(e){
+			if(e.ctrlKey && e.shiftKey){
+				e.preventDefault()
+			
+				// update data table
+				if(e.deltaY < 0 && reduce > 0) reduce--;
+				if(e.deltaY > 0 && reduce < 8) reduce++;
+				tbl_8bits_rtrbs3 = [];
+				stat_tbl_8bits_rtrbs3 = [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0];
+				make_tbl_8bits_rtrbs3(reduce);
+				
+				// update vertical data display
+				vDisplayer_tbl_8bits_rtrbs3.textContent = "";
+				fill_verticalDisplayer(vDisplayer_tbl_8bits_rtrbs3, tbl_8bits_rtrbs3);
+				
+				// update data table stat vertical displayer
+				vDisplayer_stat_tbl_8bits_rtrbs3.textContent = "";
+				fill_verticalDisplayer(vDisplayer_stat_tbl_8bits_rtrbs3, stat_tbl_8bits_rtrbs3);
+				
+				// update color previews
+				currentDataTable = tbl_8bits_rtrbs3
+				window.onresize();
+				
+				// test reversibility table
+				let reversible = test_tableReversibility(tbl_8bits_rtrbs3) === -1 ? true : false;
+				
+				// display updated value
+				let reverTestText = reversible ? " ; "+reversibleTableText : " ; "+notReversibleTableText;
+				create_miniPopup( reduce + reverTestText );
+				
+				// convert 8bits preview to 5bits preview
+				oneColPrevFunctions.update_oneColorPreview("from8to5");
+			}
+		};
+		
+		
+		
+		
+		
+		
+		
+		// tbl_8bits_fmp05 : "0.5" value control (mouse wheel + ctrl + shift) 
+		
+		vDisplayer_tbl_8bits_fmp05.onmousewheel = function(e){
+			if(e.ctrlKey && e.shiftKey){
+				e.preventDefault()
+			
+				// update data table
+				if(e.deltaY < 0 && _05 > 0) _05 = Math.round( (_05-0.1)*10 ) / 10;
+				if(e.deltaY > 0 && _05 < 1) _05 = Math.round( (_05+0.1)*10 ) / 10;
+				tbl_8bits_fmp05 = [];
+				stat_tbl_8bits_fmp05 = [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0];
+				make_tbl_8bits_fmp05(_05);
+				
+				// update vertical data display
+				vDisplayer_tbl_8bits_fmp05.textContent = "";
+				fill_verticalDisplayer(vDisplayer_tbl_8bits_fmp05, tbl_8bits_fmp05);
+				
+				// update data table stat vertical displayer
+				vDisplayer_stat_tbl_8bits_fmp05.textContent = "";
+				fill_verticalDisplayer(vDisplayer_stat_tbl_8bits_fmp05, stat_tbl_8bits_fmp05);
+				
+				// update color previews
+				currentDataTable = tbl_8bits_fmp05
+				window.onresize();
+				
+				// test reversibility table
+				let reversible = test_tableReversibility(tbl_8bits_fmp05) === -1 ? true : false;
+				
+				// display updated value
+				let reverTestText = reversible ? " ; "+reversibleTableText : " ; "+notReversibleTableText;
+				create_miniPopup( _05 + reverTestText );
+				
+				// convert 8bits preview to 5bits preview
+				oneColPrevFunctions.update_oneColorPreview("from8to5");
+			}
+		};
+		
+		
+		
+		
+		
+		
+		// stbl_8bits_to_5bits : smooth offset control (mouse wheel + ctrl + shift) 
+		
+		vDisplayer_stbl_8bits_to_5bits.onmousewheel = function(e){
+			if(e.ctrlKey && e.shiftKey){
+				e.preventDefault()
+			
+				// update data table
+				if(e.deltaY < 0 && smooth > -10) smooth--;
+				if(e.deltaY > 0 && smooth < 10) smooth++;
+				stbl_8bits_to_5bits = [];
+				stat_stbl_8bits_to_5bits = [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0];
+				make_stbl_8bits_to_5bits(smooth);
+				
+				// update vertical data display
+				vDisplayer_stbl_8bits_to_5bits.textContent = "";
+				fill_verticalDisplayer(vDisplayer_stbl_8bits_to_5bits, stbl_8bits_to_5bits);
+				
+				// update data table stat vertical displayer
+				vDisplayer_stat_stbl_8bits_to_5bits.textContent = "";
+				fill_verticalDisplayer(vDisplayer_stat_stbl_8bits_to_5bits, stat_stbl_8bits_to_5bits);
+				
+				// update color previews
+				currentDataTable = stbl_8bits_to_5bits
+				window.onresize();
+				
+				// test reversibility table
+				let reversible = test_tableReversibility(stbl_8bits_to_5bits) === -1 ? true : false;
+				
+				// display updated value
+				let reverTestText = reversible ? " ; "+reversibleTableText : " ; "+notReversibleTableText;
+				create_miniPopup( smooth + reverTestText );
+				
+				// convert 8bits preview to 5bits preview
+				oneColPrevFunctions.update_oneColorPreview("from8to5");
+			}
+		};
+		
+		
+		
+		create_rowPointer();
+		start_verticalDislayerHideControl();
+		
+		
+		// display start help screen
+		
+		
+		
+		helpPanel = document.createElement("div");
+		
+			//htmlText = "<div style='background-color: rgba(0,0,0,0.75);'></div>";
+			//htmlText = "<div>"+htmlText+"</div>";
+			//helpPanel = (new DOMParser()).parseFromString(htmlText, "text/html").body.firstElementChild;
+
+		
+			helpPanel.style.position = "fixed";
+			helpPanel.style.display = "flex";
+			helpPanel.style.justifyContent = "center";
+			helpPanel.style.alignItems = "center";
+			helpPanel.style.backgroundColor = "black";
+			helpPanel.style.opacity = 0.9;
+			helpPanel.style.left = 0;
+			helpPanel.style.right = 0;
+			helpPanel.style.top = 0;
+			helpPanel.style.bottom = 0;
+			//helpPanel.style.padding = 8;
+			
+			
+			
+			//helpPanel.style.transition = "left 1s, top 1s";
+			
+			helpPanel.onclick = function(e){
+					/*helpPanel.style.left = document.documentElement.clientWidth - 16;
+					helpBody.style.width = "0%";
+					helpPanel.style.top = document.documentElement.clientHeight - 16;;
+					helpBody.style.height = "0%";*/
+					helpPanel.style.display = "none";
+					document.body.style.overflow = "";
+			};
+			
+			/*
+			helpPanel.onmousewheel = function(e){
+				e.stopPropagation();
+				e.preventDefault();
+				window.scrollTo(0,0);
+			};
+			helpPanel.onscroll = helpPanel.onmousewheel;
+			*/
+			
+			
+			let helpBody = document.createElement("iframe");
+			
+				helpBody.style.position = "absolute";
+				helpBody.style.backgroundColor = "white";
+				//helpBody.style.opacity = 0.85;
+				helpBody.style.width = "90%";
+				helpBody.style.height = "90%";
+				
+				helpBody.style.transition = "width 1s, height 1s,";
+				
+				helpBody.src = "./helpManual.html"
+			
+				/*
+				helpBody.onmousewheel = function(e){
+					e.stopPropagation();
+					e.preventDefault();
+					window.scrollTo(0,0);
+				};
+				helpBody.onscroll = helpBody.onmousewheel;
+				*/
+
+				
+			
+			helpPanel.appendChild(helpBody);
+			
+			
+
+		
+		document.body.appendChild(helpPanel);
+		document.body.style.overflow = "hidden";
+	};
+	
+</script>
+
