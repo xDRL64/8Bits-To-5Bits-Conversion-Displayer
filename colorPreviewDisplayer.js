@@ -559,10 +559,11 @@ var create_gradientPreviews = function(){
 			set_oneColorPreview(_8bPrev, _5bPrev, "from8to5");
 		}
 		
-		if(e.shiftKey && e.ctrlKey){
-			drawDroppedImg = !drawDroppedImg;
-			window.onresize();
-		}
+		if(e.shiftKey && e.ctrlKey)
+			if(droppedImageData !== undefined){
+				drawDroppedImg = !drawDroppedImg;
+				window.onresize();
+			}
 	};
 	
 	

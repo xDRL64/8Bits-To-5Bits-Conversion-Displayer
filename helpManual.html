@@ -58,7 +58,7 @@
 
 8 Bits To 5 Bits Conversion Displayer<br/><br/>Help Instruction Manual :
 
-	(Prototype Version : 0.0.14)
+	(Prototype Version)
 	
 	Click on the black margin to close this help screen
 	Press SHIFT + F1 to display this help screen again
@@ -98,8 +98,6 @@ On non-table columns :
 
 			Update grey gradient bar
 
-			Update 8bits and 5bits color previews bar (from 8bits color preview to 5bits color preview)
-
 
 On anywhere :
 
@@ -123,6 +121,12 @@ On grey gradient bar :
 	On Left Click + Right Click :
 	
 		Reset saturation to 1.0 and update staturation of main screen
+		
+	On SHIFT + Click :
+		
+		Select pixel color on the mouse cursor position on the grey gradient bar
+		Then update 8bits and 5bits color previews bar with the selected pixel color
+		(Update from 8bits color preview to 5bits color preview if a table column is selected)
 	
 	
 On main screen ( gradient image / dropped image )
@@ -142,7 +146,7 @@ On main screen ( gradient image / dropped image )
 		On SHIFT + Click :
 		
 			Select pixel color on the mouse cursor position on the gradient image or the dropped image
-			Then update 8bits and 5bits color previews bar
+			Then update 8bits and 5bits color previews bar with the selected pixel color
 			(Update from 8bits color preview to 5bits color preview if a table column is selected)
 			
 		On SHIFT + CTRL + Click :
@@ -228,11 +232,12 @@ Observe Reversibility Tables :
 	
 Special table columns with updatable parameter :	
 
-	In this prototype version the second red column, the second orange colum, and the second blue column are special columns.
+	In this prototype version the second red column, the second orange column, and the second blue column are special columns.
 	They allow to rebuild them with a variable parametre that change while SHIFT + CTRL + Mouse Wheel movement.
 	Special columns are mentionned on CTRL + Mouse Enter over a column.
 	
 	On every update it will display, the new value for its parameter and its reversibility state, at top left of the window.
+	(On every update it will also update 8bits and 5bits color previews bar (from 8bits color preview to 5bits color preview))
 
 
 About this version :
